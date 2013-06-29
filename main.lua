@@ -1,6 +1,7 @@
 -- Mandelbrot set renderer by Yu Chen Hou
 
 -- screenshot feature please
+-- rendering should be done in another thread
 -- arrow to pan, scroll to zoo
 
 function love.load()
