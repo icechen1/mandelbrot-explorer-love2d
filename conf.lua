@@ -3,6 +3,6 @@ function love.conf(t)
     t.author = "Yu Chen Hou"        -- The author of the game (string)
     t.url = "http://yuchenhou.com/"                 -- The website of the game (string)
     t.version = "0.8.0"         -- The LÖVE version this game was made for (string)
-    t.console = true	-- Attach a console (boolean, Windows only)
+    t.console = false	-- Attach a console (boolean, Windows only)
     t.release = false           -- Enable release mode (boolean)
 end
