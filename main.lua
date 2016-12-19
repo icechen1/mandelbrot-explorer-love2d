@@ -4,6 +4,9 @@
 -- rendering should be done in another thread
 -- arrow to pan, scroll to zoo
 
+ch_image = love.thread.getChannel("image")
+ch_progress = love.thread.getChannel("progress")
+
 function love.load()
 	font = love.graphics.newFont(16)
 	love.graphics.setFont(font)
@@ -25,14 +28,18 @@ end
 
 function love.update(dt)
 	if invalidated and start and gen_thread == nil then
-		gen_thread = love.thread.newThread("render", "render.lua")
+		gen_thread = love.thread.newThread("render.lua")
 		gen_thread:start()
-		gen_thread:set("window_width", window_width)
-		gen_thread:set("window_height", window_height)
-		gen_thread:set("x", x)
-		gen_thread:set("y", y)
-		gen_thread:set("scale", scale)
-		gen_thread:set("max_iter", max_iter)
+		local msg = {
+			window_width = window_width,
+			window_height = window_height,
+			x = x,
+			y = y,
+			scale = scale,
+			max_iter = max_iter,
+		}
+		local ch = love.thread.getChannel("config")
+		ch:push(msg)
 		invalidated = false
 	end
 	
@@ -51,12 +58,12 @@ function love.update(dt)
       y = y - (speed * dt)
    end
    if gen_thread then
-   		err_msg = gen_thread:get('error')
+		err_msg = gen_thread:getError()
 		if err_msg then
 			print (err_msg)
 		end
-		imagedata = gen_thread:get("image")
-		progress = gen_thread:peek("progress")
+		imagedata = ch_image:pop()
+		progress = ch_progress:peek()
 		if imagedata then
 			image = love.graphics.newImage(imagedata)
 			--Clean out the thread to reuse later
@@ -76,13 +83,13 @@ end
 
 --zoom
 function love.mousereleased(mx, my, button)
-   if button == 'wd' then
+   if button == 1 then
       scale = scale/2
 	  --x = mx/window_width
 	  --y = my/window_height
 	  invalidated=true
    end
-   if button == 'wu' then
+   if button == 2 then
       scale = scale*2
 	  --x = mx/window_width
 	  --y = my/window_height
